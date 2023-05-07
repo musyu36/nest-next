@@ -1,0 +1,38 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// モデルの構造をここに定義していく
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id Int @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+  email String @unique
+  hashedPassword String
+  // UserからTaskが分かるように逆参照のフィールドとしてtasks Task[]を書く
+  tasks Task[]
+}
+
+model Task {
+  id Int @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  title String
+  description String?
+  userId Int
+  // 1対多の対応付
+  // @relationで紐付け
+  // Task.userId を User.id と紐付け
+  // fields に userId references に id を指定 (Userのidで有ることはuser Userと書いた時点で分かる)
+  // onDelete: Cascade で Userが削除されたときに、それに紐づくTaskも自動的に削除する
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
